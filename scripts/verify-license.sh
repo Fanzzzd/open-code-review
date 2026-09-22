@@ -12,8 +12,12 @@ CURRENT_YEAR=$(date +%Y)
 MIN_YEAR=2026
 SPDX_REGEX="SPDX-License-Identifier: Apache-2.0"
 COPYRIGHT_REGEX="Copyright [0-9]{4} alibaba/open-code-review Contributors"
+YEAR_REGEX="Copyright ([0-9]{4})"
 
-LICENSE_EXTS=(go sh js mjs ts tsx)
+# Keep in step with LICENSE_EXTS in add-license.sh, which also records why each
+# extension is in or out. This side only greps for the header text, so the
+# comment syntax does not matter here.
+LICENSE_EXTS=(go js mjs ts tsx kt kts sh py css)
 
 IGNORED_PATHS=(
   "vendor/"
@@ -50,17 +54,20 @@ while IFS= read -r file; do
 
   header="$(head -20 "$file")"
 
-  if ! echo "$header" | grep -qF "$SPDX_REGEX"; then
+  # Feed $header via here-string, not `echo |`: grep -q exits on the first match,
+  # so echo can die of SIGPIPE (141) and pipefail then reports a valid header as missing.
+  if ! grep -qF "$SPDX_REGEX" <<<"$header"; then
     FAILED+=("$file (missing SPDX identifier)")
     continue
   fi
 
-  if ! echo "$header" | grep -qE "$COPYRIGHT_REGEX"; then
+  if ! grep -qE "$COPYRIGHT_REGEX" <<<"$header"; then
     FAILED+=("$file (missing copyright notice)")
     continue
   fi
 
-  year="$(echo "$header" | grep -oE 'Copyright ([0-9]{4})' | grep -oE '[0-9]{4}' | head -1)"
+  year=""
+  [[ "$header" =~ $YEAR_REGEX ]] && year="${BASH_REMATCH[1]}"
   if [ -z "$year" ] || [ "$year" -lt "$MIN_YEAR" ] || [ "$year" -gt "$CURRENT_YEAR" ]; then
     FAILED+=("$file (invalid year: ${year:-none})")
     continue

@@ -1,4 +1,8 @@
 #!/usr/bin/env python3
+
+# SPDX-License-Identifier: Apache-2.0
+# Copyright 2026 alibaba/open-code-review Contributors
+
 """post_review.py
 
 Runs Open Code Review (`ocr review --format json`) against the current
@@ -70,7 +74,7 @@ def run_ocr_review(from_ref: str | None = None, to_ref: str | None = None,
                     extra_args: list[str] | None = None,
                     timeout: int = 1800) -> dict:
     """Run `ocr review --format json` and return the parsed JSON output."""
-    cmd = ["ocr", "review", "--format", "json"]
+    cmd = ["ocr", "review", "--audience", "agent", "--format", "json"]
     if from_ref and to_ref:
         cmd += ["--from", from_ref, "--to", to_ref]
     if extra_args:
