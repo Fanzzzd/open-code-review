@@ -21,10 +21,11 @@ files=("action.yml")
 # trailing comment), and a `# v7` comment would satisfy the format the
 # check claims to enforce. Anything unusual (quoted values, extra trailing
 # content) fails closed rather than being guessed at.
-# The directive filter also matches flow-mapping openers ("- {uses: …}"),
-# which the pinned pattern below never accepts — so flow-style entries fail
-# closed as unusual syntax instead of being silently skipped.
-directive='^[[:space:]]*(-[[:space:]]+)?(\{[[:space:]]*)?uses:'
+# The directive filter also matches flow-mapping openers ("- {uses: …}")
+# and quoted keys ("uses":, 'uses' :) — valid YAML the pinned pattern below
+# never accepts — so those forms fail closed as unusual syntax instead of
+# slipping past the filter and being silently skipped.
+directive="^[[:space:]]*(-[[:space:]]+)?(\\{[[:space:]]*)?['\"]?uses['\"]?[[:space:]]*:"
 pinned='^[[:space:]]*(-[[:space:]]+)?uses:[[:space:]]+[A-Za-z0-9_.-]+/[A-Za-z0-9_./-]+@[0-9a-f]{40}[[:space:]]+#[[:space:]]*v[0-9]+\.[0-9]+\.[0-9]+[[:space:]]*$'
 local_ref='^[[:space:]]*(-[[:space:]]+)?uses:[[:space:]]*\./'
 
